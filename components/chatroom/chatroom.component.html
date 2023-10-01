@@ -1,0 +1,45 @@
+<div class="chatroom_container">
+    <div class="chatroom_header">
+        <div class="percent50_inline_blocks">
+            <div class="flex-block">
+                <h1>Chat</h1>
+            </div>
+        </div>
+        <div class="percent50_inline_blocks">
+            <div class="flex-block">
+                <p
+                 class="participants">{{participants_counter}} - participants</p>
+            </div>
+        </div>
+    </div>
+    <div 
+        class="message_list_container"
+        #messages_container>
+        <div 
+            *ngFor="let message of messages"
+            class="message_container">
+            <div class="user_profile_container">
+                <div 
+                class="avatar"
+                [ngStyle]="{
+                    'background-image': 'url(' + userService.get_avatar(message.profile).src + ')'
+                }"></div>
+
+                <span class="username-container">
+                    <span>
+                        @{{message.profile.username}}
+                    </span>
+                </span>
+            </div>
+            <p>{{ message.content }} </p>
+        </div>
+    </div>
+    <div class="message_input_container">
+        <input 
+            type="text" 
+            class="message_input"
+            [(ngModel)]="new_message"
+            (keyup.enter)="sendMessage()"
+            placeholder="Type your message here...">
+    </div>  
+</div>

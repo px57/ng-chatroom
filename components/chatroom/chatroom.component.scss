@@ -1,0 +1,102 @@
+.chatroom_container {
+    // background: red;
+    height: 100%;
+
+    .chatroom_header {
+        height: 10%;
+        padding-left: 10px;
+        padding-right: 10px;
+        
+
+        h1 {
+            align-self: center;
+            color: white;
+            display: inline-block;
+            font-size: 1.2em;
+        }
+        .participants {
+            color: #f9f9f9;
+            right: 13px;
+            position: absolute;
+            align-self: center;
+        }
+    }
+
+    .message_list_container {
+        clear: both;
+        height: 75%;
+        color: white;
+        overflow: auto;
+        overflow-x: hidden;
+        margin-left: 10px;
+        margin-right: 10px;
+        border-top: 1px solid #544b4b;
+
+        .message_container:first-child {
+            margin-top: 20px;
+        }
+        .message_container {
+            margin-right: 15px;
+
+            p {
+                margin-left: 39px;
+                margin-bottom: 13px;
+                word-break: break-word;
+            }
+
+            .user_profile_container {
+
+                .avatar {
+                    height: 30px;
+                    width: 30px;
+                    background-color: black;
+                    border-radius: 50px;
+                    display: flex;
+                    float: left;
+                    background-size: contain;
+                }
+                .username-container {
+                    vertical-align: middle;
+                    display: flex;
+                    padding-left: 10px;
+                    overflow: hidden;
+                    height: 30px;
+                    width: 70%;
+                    // add ... when text is too long
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    
+                    // background: red;
+                    span {
+                        align-self: center;
+                    }
+                }
+            }
+        }
+    }
+
+    .message_input_container {
+        height: 15%;
+
+        input {
+            height: 69%;
+            width: 83%;
+            border-radius: 51px;
+            border: none;
+            padding-left: 5%;
+            padding-right: 5%;
+            background: rgb(93 93 93 / 65%);
+            margin: 3%;
+            color: white;
+            backdrop-filter: blur(5px);
+            font-weight: 600;
+
+
+            &:focus {
+                outline: none;
+                border: 1px solid rgba(93, 93, 93, 0.65);
+                background-color: black;
+            }
+        }
+    }
+}
