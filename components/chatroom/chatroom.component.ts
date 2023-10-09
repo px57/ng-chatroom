@@ -92,7 +92,7 @@ export class ChatroomComponent {
       this.userService.open_login_modal();
       return; 
     };
-    this.chatroomService.send_message(this.new_message);
+    this.chatroomService.call__send_message(this.new_message);
     this.new_message = '';
   }
 
