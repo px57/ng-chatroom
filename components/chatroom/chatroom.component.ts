@@ -20,8 +20,10 @@ export interface Message {
 
 @Component({
   selector: 'app-chatroom',
-  templateUrl: './chatroom.component.html',
-  styleUrls: ['./chatroom.component.scss']
+  templateUrl: './../../../../templates/chatroom/chatroom/chatroom.component.html',
+  styleUrls: [
+    './../../../../templates/chatroom/chatroom/chatroom.component.scss',
+  ]
 })
 export class ChatroomComponent {
   /**
