@@ -2,14 +2,26 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { WebSocketsConfig, WebsocketService } from 'src/modules/tools/services/websocket.service';
 import { JoinRoomTypes } from '../types/chatroom.types';
+import { Profile } from 'src/modules/profile/services/user.service';
 
 /**
  * @description: 
  */
 export interface ChatroomStream {
-  event: 'messages' | 'participants_counter' | 'new_message' | 'error',
+  event: 'messages' | 'participants_counter' | 'new_message' | 'error' | 'init',
   data: any,
 };
+
+/**
+ * @description: 
+ */
+export interface ChatRoomTP {
+  id: number,
+  activated: boolean,
+  name: string,
+  description: string,
+  onwer: Profile,
+}
 
 @Injectable({
   providedIn: 'root'
@@ -28,9 +40,15 @@ export class ChatroomService {
   /**
    * @description:  
    */
+  public chatroom_list: Array<ChatRoomTP> = [];
+
+  /**
+   * @description:  
+   */
   constructor(
     private wsService: WebsocketService,
   ) { 
+    this.bindChatRoomStream();
     this.setConfigWebsocket();
   }
 
@@ -39,8 +57,8 @@ export class ChatroomService {
    */
   private setConfigWebsocket(): void {
     this.wsService.setConfig({
-      port: 4242,
-      pathname: 'ws/chatroom/?room=fr&fakeConnect=true',
+      port: 9001,
+      pathname: 'ws/chat_room_consumer/',
       service: this,
     });
   }
@@ -99,6 +117,16 @@ export class ChatroomService {
   // ###############################################################################################################
   // ###############################################################################################################
   // ##########################################[  CALLS  ]##########################################################
+
+  /**
+   * @description: 
+   */
+  public recept__init(data: any): void {
+    this.stream.next({
+      event: 'init',
+      data: data,
+    });
+  }
 
   /**
    * @description: 
@@ -162,6 +190,61 @@ export class ChatroomService {
       this.ws_connection,
       {
         'new_message': message,
+    });
+  }
+
+  /**
+   * @description: 
+   */
+  private bindChatRoomStream(): void {
+    this.stream.subscribe((data: ChatroomStream) => {
+      switch (data.event) {
+        case 'init':
+          this.set_chatroom_list(data.data.chatroom_list);
+          break;
+      }
+    });
+  }
+
+  /**
+   * @description:
+   */
+  private get_chatroom_list(): Array<ChatRoomTP> {
+    return this.chatroom_list;
+  }
+
+  /**
+   * @description: 
+   */
+  private has_chatroom_to_join(): boolean {
+    return this.chatroom_list.length > 0;
+  }
+
+  /**
+   * @description:
+   */
+  private not_has_chatroom_to_join(): boolean {
+    return !this.has_chatroom_to_join();
+  }
+
+  /**
+   * @description:
+   */
+  private set_chatroom_list(chatroom_list: Array<ChatRoomTP>): void {
+    this.chatroom_list = chatroom_list;
+  }
+
+  /**
+   * @description: 
+   */
+  public join_first_room_in_chatroom_list(): void {
+    if (this.not_has_chatroom_to_join()) {
+      return; 
+    }
+    const chatroom = this.get_chatroom_list()[0];
+    this.call__join_room({
+      name: chatroom.name,
+      user__id: chatroom.onwer.id,
     });
   }
 }

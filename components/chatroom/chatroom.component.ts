@@ -19,7 +19,7 @@ export interface Message {
 
 
 @Component({
-  selector: 'app-chatroom',
+  selector: 'chatroom__chatroom',
   templateUrl: './../../../../templates/chatroom/chatroom/chatroom.component.html',
   styleUrls: [
     './../../../../templates/chatroom/chatroom/chatroom.component.scss',
@@ -127,6 +127,11 @@ export class ChatroomComponent {
   }
 
   /**
+   * @description: 
+   */
+  public recept__init(data: any): void {}
+
+  /**
    * @description:
    */
   private waitToScrollToBottom(): void {
@@ -141,5 +146,4 @@ export class ChatroomComponent {
   private forceScrollToBottom(): void {
     this.messages_container.nativeElement.scrollTop = 100000;
   }
-
 }

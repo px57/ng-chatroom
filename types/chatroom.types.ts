@@ -5,5 +5,5 @@
  */
 export interface JoinRoomTypes {
     name: string,
-    profile__id?: number,
+    user__id?: number,
 }

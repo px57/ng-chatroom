@@ -7,6 +7,7 @@ import {
 import { 
   WebsocketService,
 } from 'src/modules/tools/services/websocket.service';
+import { ChatroomService } from '../../services/chatroom.service';
 
 @Component({
   selector: 'chatroom__menu-room-list',
@@ -23,16 +24,38 @@ export class MenuRoomListComponent {
   public interface__name: string = 'default';
 
   /**
-   * @description: 
+   * @description:
    */
-  constructor(
-    public websocketService: WebsocketService,
-  ) { }
+  public chatroom_list: any[] = [];
 
   /**
    * @description: 
    */
-  public ngOnInit(): void {
-        // alert ('menu-room-list')//===--
+  constructor(
+    public websocketService: WebsocketService,
+    public chatroomService: ChatroomService,
+  ) {
+    this.bindChatRoom();
+  }
+
+  /**
+   * @description: 
+   */
+  public ngOnInit(): void { 
+      
+  }
+
+  /**
+   * @description: 
+   */
+  private bindChatRoom(): void {
+    this.chatroom_list = this.chatroomService.chatroom_list;
+    this.chatroomService.stream.subscribe((data: any) => {
+      switch (data.event) {
+        case 'init':
+          this.chatroom_list = data.data.chatroom_list;
+          break;
+      }  
+    });
   }
 }
