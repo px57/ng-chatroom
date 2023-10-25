@@ -43,6 +43,11 @@ export class ChatroomService {
   public chatroom_list: Array<ChatRoomTP> = [];
 
   /**
+   * @description: 
+   */
+  public selected: ChatRoomTP | undefined;
+
+  /**
    * @description:  
    */
   constructor(
@@ -131,18 +136,36 @@ export class ChatroomService {
   /**
    * @description: 
    */
-  public call__create_personnal_room(room: string): void {
-
+  public recept__new_room(data: any): void {
+    this.chatroom_list.unshift(data);
   }
 
   /**
    * @description: 
    */
-  public call__join_room(room: JoinRoomTypes): void {
+  public call__create_personnal_room(room: string): void {
     this.ws_connection?.wsService?.send(
       this.ws_connection,
       {
-        'join_room': room,
+        'create_personnal_room': {
+          name: room,
+        },
+    });
+  }
+
+  /**
+   * @description: 
+   */
+  public call__join_room(room: ChatRoomTP): void {
+    this.selected = room;
+    console.log(this.selected);
+    this.ws_connection?.wsService?.send(
+      this.ws_connection,
+      {
+        'join_room': {
+          name: room.name,
+          user__id: room.onwer.id,
+        },
     });
   }
 
@@ -156,8 +179,24 @@ export class ChatroomService {
   /**
    * @description:
    */
-  public call__delete_room(room: string): void {
-      
+  public call__delete_room(room: ChatRoomTP): void {
+      for (let chatroom of this.chatroom_list) {
+        if (chatroom.id === room.id) {
+          this.chatroom_list.splice(this.chatroom_list.indexOf(chatroom), 1);
+          break;
+        }
+      }
+
+      if (room.id === this.selected?.id) {
+        this.selected = undefined;
+        this.join_first_room_in_chatroom_list();
+      }
+
+      this.ws_connection?.wsService?.send(
+        this.ws_connection,
+        {
+          'delete_room': room,
+      });
   }
 
   /**
@@ -221,6 +260,13 @@ export class ChatroomService {
   }
 
   /**
+   * @description: 
+   */ 
+  public chatroom_is_selected(chatroom: ChatRoomTP): boolean {
+    return this.selected === chatroom;
+  }
+
+  /**
    * @description:
    */
   private not_has_chatroom_to_join(): boolean {
@@ -241,10 +287,11 @@ export class ChatroomService {
     if (this.not_has_chatroom_to_join()) {
       return; 
     }
-    const chatroom = this.get_chatroom_list()[0];
-    this.call__join_room({
-      name: chatroom.name,
-      user__id: chatroom.onwer.id,
-    });
+
+    let chatroom = this.get_chatroom_list()[0];
+    if (this.selected !== undefined) {
+      chatroom = this.selected;
+    }
+    this.call__join_room(chatroom);
   }
 }
