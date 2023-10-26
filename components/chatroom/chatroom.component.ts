@@ -2,20 +2,11 @@ import {
   Component,
   ViewChild
 } from '@angular/core';
-import { ChatroomService } from 'src/modules/chatroom/services/chatroom.service';
+import { ChatroomService, ChatroomMessage } from 'src/modules/chatroom/services/chatroom.service';
 import { Profile } from 'src/modules/profile/services/user.service';
 import { UserService } from 'src/modules/profile/services/user.service';
 
-/**
- * @description: 
- */
-export interface Message {
-  id: number,
-  activated: boolean,
-  content: string,
-  chatroom: number,
-  profile: Profile,
-};
+
 
 
 @Component({
@@ -39,7 +30,7 @@ export class ChatroomComponent {
   /**
    * @description:
    */
-  public messages: Array<Message> = [];
+  public messages: Array<ChatroomMessage> = [];
 
   /**
    * @description: 
@@ -109,7 +100,7 @@ export class ChatroomComponent {
   /**
    * @description:
    */
-  public recept__messages(messages: Array<Message>): void {
+  public recept__messages(messages: Array<ChatroomMessage>): void {
     this.messages = messages;
     this.waitToScrollToBottom();
   }
@@ -117,8 +108,8 @@ export class ChatroomComponent {
   /**
    * @description:
    */
-  public recept__new_message(message: Message): void {
-    this.messages.push(message);
+  public recept__new_message(message: Array<ChatroomMessage>): void {
+    this.messages.push.apply(this.messages, message);
     this.waitToScrollToBottom();
     // TODO: Limit the number of messages in the chatroom, and delete the oldest ones. (100 max)
     // if (this.messages.length > this.max_messages) {
