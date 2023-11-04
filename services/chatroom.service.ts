@@ -5,6 +5,7 @@ import { JoinRoomTypes } from '../types/chatroom.types';
 import { Profile } from 'src/modules/profile/services/user.service';
 import { LibsService } from 'src/modules/tools/services/libs.service';
 import { DeleteDuplicate } from 'src/modules/tools/classes/algo';
+import { FeelingService } from 'src/modules/feeling/services/feeling.service';
 
 /**
  * @description: 
@@ -77,6 +78,7 @@ export class ChatroomService {
   constructor(
     private wsService: WebsocketService,
     private l: LibsService,
+    private feeelingService: FeelingService,
   ) { 
     this.bindChatRoomStream();
     this.setConfigWebsocket();
@@ -122,8 +124,11 @@ export class ChatroomService {
     message_list = del_duplicate.foreach(message_list, 'id');
 
     for (let message of message_list) {
-      this.format_message(message_list, message); 
+      this.format_message(message_list, message);
+      this.feeelingService.setFeelingLoadList('chatroom.Message', message.id);
     }
+
+    this.feeelingService.loadFeelingList(undefined);
     return message_list.filter((m) => m.replyTo === null);
   }
 

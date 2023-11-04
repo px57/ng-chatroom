@@ -5,6 +5,7 @@ import { ChatroomComponent } from './components/chatroom/chatroom.component';
 import { ChatroomService } from 'src/modules/chatroom/services/chatroom.service';
 import { MenuRoomListComponent } from './components/menu-room-list/menu-room-list.component';
 import { ToolsModule } from '../tools/tools.module';
+import { FeelingModule } from '../feeling/feeling.module';
 
 @NgModule({
   declarations: [
@@ -16,6 +17,7 @@ import { ToolsModule } from '../tools/tools.module';
     FormsModule,
     ReactiveFormsModule,
     ToolsModule,
+    FeelingModule,
   ],
   providers: [
     ChatroomService,

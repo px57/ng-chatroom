@@ -5,8 +5,7 @@ import {
 import { ChatroomService, ChatroomMessage } from 'src/modules/chatroom/services/chatroom.service';
 import { Profile } from 'src/modules/profile/services/user.service';
 import { UserService } from 'src/modules/profile/services/user.service';
-
-
+import { __db__ } from 'src/app/app.db';
 
 
 @Component({
@@ -17,8 +16,10 @@ import { UserService } from 'src/modules/profile/services/user.service';
   ]
 })
 export class ChatroomComponent {
+  __db__ = __db__;
+
   /**
-   * @description: 
+   * @description:
    */
   @ViewChild('messages_container') messages_container: any;
 
