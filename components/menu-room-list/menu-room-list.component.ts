@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core'
 import { WebsocketService } from 'src/modules/tools/services/websocket.service'
 import { ChatroomService } from '../../services/chatroom.service'
+import { SidebarService } from '../../../../app/services/sidebar.service'
 
 @Component({
   selector: 'chatroom__menu-room-list',
@@ -32,7 +33,8 @@ export class MenuRoomListComponent {
    */
   constructor(
     public websocketService: WebsocketService,
-    public chatroomService: ChatroomService
+    public chatroomService: ChatroomService,
+    public sidebarService: SidebarService
   ) {
     this.bindChatRoom()
   }
@@ -56,7 +58,24 @@ export class MenuRoomListComponent {
     })
   }
 
+  /**
+   * @description: collapse sidebar
+   */
   handleCollapseSideBar(item: boolean): void {
     this.isSideBarCollapsed = item
+  }
+
+  /**
+   * @description: close sidebar function
+   */
+  public handleCloseSidebar(): void {
+    this.sidebarService.closeSidebar()
+  }
+
+  /**
+   * @description: get sidebar opened value
+   */
+  public getOpenedSidebarValue(): boolean {
+    return this.sidebarService.isSidebarOpened
   }
 }
