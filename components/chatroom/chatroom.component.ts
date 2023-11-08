@@ -2,6 +2,7 @@ import { Component, ViewChild } from '@angular/core'
 import { ChatroomService } from 'src/modules/chatroom/services/chatroom.service'
 import { Profile } from 'src/modules/profile/services/user.service'
 import { UserService } from 'src/modules/profile/services/user.service'
+import { SwitchModalService } from '../../../modal/services/switch-modal.service'
 
 /**
  * @description:
@@ -13,6 +14,11 @@ export interface Message {
   chatroom: number
   profile: Profile
 }
+
+/**
+ * @description: initial settings option type
+ */
+type initialSettingsType = 'all_sectors' | 'all_business' | 'all_geographies'
 
 @Component({
   selector: 'chatroom__chatroom',
@@ -68,7 +74,8 @@ export class ChatroomComponent {
    */
   constructor(
     private chatroomService: ChatroomService,
-    public userService: UserService
+    public userService: UserService,
+    public switchModalService: SwitchModalService
   ) {}
 
   /**
@@ -155,5 +162,12 @@ export class ChatroomComponent {
    */
   private forceScrollToBottom(): void {
     this.messages_container.nativeElement.scrollTop = 100000
+  }
+
+  /**
+   * @description: initial settings modal function
+   */
+  public handleOpenUserInitialSettingsModal(option: initialSettingsType): void {
+    this.switchModalService.open_modal(option)
   }
 }

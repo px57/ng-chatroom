@@ -1,26 +1,29 @@
-import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
-import { WebSocketsConfig, WebsocketService } from 'src/modules/tools/services/websocket.service';
-import { JoinRoomTypes } from '../types/chatroom.types';
-import { Profile } from 'src/modules/profile/services/user.service';
+import { Injectable } from '@angular/core'
+import { Subject } from 'rxjs'
+import {
+  WebSocketsConfig,
+  WebsocketService
+} from 'src/modules/tools/services/websocket.service'
+import { JoinRoomTypes } from '../types/chatroom.types'
+import { Profile } from 'src/modules/profile/services/user.service'
 
 /**
- * @description: 
+ * @description:
  */
 export interface ChatroomStream {
-  event: 'messages' | 'participants_counter' | 'new_message' | 'error' | 'init',
-  data: any,
-};
+  event: 'messages' | 'participants_counter' | 'new_message' | 'error' | 'init'
+  data: any
+}
 
 /**
- * @description: 
+ * @description:
  */
 export interface ChatRoomTP {
-  id: number,
-  activated: boolean,
-  name: string,
-  description: string,
-  onwer: Profile,
+  id: number
+  activated: boolean
+  name: string
+  description: string
+  onwer: Profile
 }
 
 @Injectable({
@@ -28,39 +31,37 @@ export interface ChatRoomTP {
 })
 export class ChatroomService {
   /**
-   * @description: 
+   * @description:
    */
-  public ws_connection: WebSocketsConfig | undefined;
+  public ws_connection: WebSocketsConfig | undefined
 
   /**
    * @description: The stream of data from the websocket
    */
-  public stream: Subject<ChatroomStream> = new Subject<ChatroomStream>();
+  public stream: Subject<ChatroomStream> = new Subject<ChatroomStream>()
 
   /**
-   * @description:  
+   * @description:
    */
-  public chatroom_list: Array<ChatRoomTP> = [];
+  public chatroom_list: Array<ChatRoomTP> = []
 
   /**
-   * @description:  
+   * @description:
    */
-  constructor(
-    private wsService: WebsocketService,
-  ) { 
-    this.bindChatRoomStream();
-    this.setConfigWebsocket();
+  constructor(private wsService: WebsocketService) {
+    this.bindChatRoomStream()
+    this.setConfigWebsocket()
   }
 
   /**
-   * @description: 
+   * @description:
    */
   private setConfigWebsocket(): void {
     this.wsService.setConfig({
       port: 9001,
       pathname: 'ws/chat_room_consumer/',
-      service: this,
-    });
+      service: this
+    })
   }
 
   // ###############################################################################################################
@@ -73,31 +74,29 @@ export class ChatroomService {
   // ##########################################[  RECEPT  ]#########################################################
 
   /**
-   * @description: 
+   * @description:
    */
   public recept__messages(data: any): void {
     this.stream.next({
       event: 'messages',
-      data: data,
-    });
-  }
-
-  /**
-   * @description: 
-   */
-  public recept__participants_counter(data: any): void {
-    this.stream.next({
-      event: 'participants_counter',
-      data: data,
-    });
+      data: data
+    })
   }
 
   /**
    * @description:
    */
-  public recept__error(data: any): void {
-
+  public recept__participants_counter(data: any): void {
+    this.stream.next({
+      event: 'participants_counter',
+      data: data
+    })
   }
+
+  /**
+   * @description:
+   */
+  public recept__error(data: any): void {}
 
   /**
    * @description:
@@ -105,8 +104,8 @@ export class ChatroomService {
   public recept__new_message(data: any): void {
     this.stream.next({
       event: 'new_message',
-      data: data,
-    });
+      data: data
+    })
   }
 
   // ###############################################################################################################
@@ -119,132 +118,117 @@ export class ChatroomService {
   // ##########################################[  CALLS  ]##########################################################
 
   /**
-   * @description: 
+   * @description:
    */
   public recept__init(data: any): void {
     this.stream.next({
       event: 'init',
-      data: data,
-    });
+      data: data
+    })
   }
 
   /**
-   * @description: 
+   * @description:
    */
   public call__create_personnal_room(room: string): void {
-
+    alert(`from service, ${room}`)
   }
 
   /**
-   * @description: 
+   * @description:
    */
   public call__join_room(room: JoinRoomTypes): void {
-    this.ws_connection?.wsService?.send(
-      this.ws_connection,
-      {
-        'join_room': room,
-    });
+    this.ws_connection?.wsService?.send(this.ws_connection, {
+      join_room: room
+    })
   }
 
   /**
    * @description:
    */
-  public call__leave_room(room: string): void {
-
-  }
+  public call__leave_room(room: string): void {}
 
   /**
    * @description:
    */
-  public call__delete_room(room: string): void {
-      
-  }
+  public call__delete_room(room: string): void {}
 
   /**
    * @description:
    */
-  public call__edit_room(room: string): void {
-      
-  }
+  public call__edit_room(room: string): void {}
 
   /**
    * @description:
    */
-  public call__fetch_all_rooms(): void {
-
-  }
-
+  public call__fetch_all_rooms(): void {}
 
   /**
    * @description:
    */
-  public call__get_messages(room: string): void {
-
-  }
+  public call__get_messages(room: string): void {}
 
   /**
-   * @description: 
+   * @description:
    */
   public call__send_message(message: string): void {
-    this.ws_connection?.wsService?.send(
-      this.ws_connection,
-      {
-        'new_message': message,
-    });
+    this.ws_connection?.wsService?.send(this.ws_connection, {
+      new_message: message
+    })
   }
 
   /**
-   * @description: 
+   * @description:
    */
   private bindChatRoomStream(): void {
     this.stream.subscribe((data: ChatroomStream) => {
       switch (data.event) {
         case 'init':
-          this.set_chatroom_list(data.data.chatroom_list);
-          break;
+          this.set_chatroom_list(data.data.chatroom_list)
+          break
       }
-    });
+    })
   }
 
   /**
    * @description:
    */
   private get_chatroom_list(): Array<ChatRoomTP> {
-    return this.chatroom_list;
+    return this.chatroom_list
   }
 
   /**
-   * @description: 
+   * @description:
    */
   private has_chatroom_to_join(): boolean {
-    return this.chatroom_list.length > 0;
+    return this.chatroom_list.length > 0
   }
 
   /**
    * @description:
    */
   private not_has_chatroom_to_join(): boolean {
-    return !this.has_chatroom_to_join();
+    return !this.has_chatroom_to_join()
   }
 
   /**
    * @description:
    */
   private set_chatroom_list(chatroom_list: Array<ChatRoomTP>): void {
-    this.chatroom_list = chatroom_list;
+    this.chatroom_list = chatroom_list
   }
 
   /**
-   * @description: 
+   * @description:
    */
   public join_first_room_in_chatroom_list(): void {
     if (this.not_has_chatroom_to_join()) {
-      return; 
+      return
     }
-    const chatroom = this.get_chatroom_list()[0];
+    const chatroom = this.get_chatroom_list()[0]
     this.call__join_room({
       name: chatroom.name,
-      user__id: chatroom.onwer.id,
-    });
+      user__id: chatroom.onwer.id
+    })
   }
 }
