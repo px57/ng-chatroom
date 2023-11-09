@@ -20,6 +20,11 @@ export interface Message {
  */
 type initialSettingsType = 'all_sectors' | 'all_business' | 'all_geographies'
 
+/**
+ * @description: user action option type
+ */
+type userActionType = 'like' | 'dislike' | 'copy'
+
 @Component({
   selector: 'chatroom__chatroom',
   templateUrl:
@@ -55,19 +60,9 @@ export class ChatroomComponent {
   public participants_counter: number = 0
 
   /**
-   * @description:
+   * @description: initial settings accepted value
    */
-  public message_content: string = `
-  1. Le Green Deal  est une stratégie de croissance de l’Union européenne qui vise à transformer l’Europe en une économie et
-  votre entreprise aux ESG réglementaires.¹ <br />
-  Pour votre entreprise, voici les actions à effectuer : <br />
-  2. Publier des informations non financières : Les grandes entreprises qui sont des entités d’intérêt public et les entités d’intérêt public qui sont les entreprises mères d’un grand groupe doivent publier une déclaration non financière qui fournit des informations sur les questions environnementales, sociales et de gouvernance (ESG) liées à leur activité. Les PME sont exemptées de ces exigences supplémentaires.²<br />
-  3. Adopter une politique de diversité : Les entreprises sont encouragées à améliorer la transparence concernant leur politique de diversité et à favoriser la présence de membres diversifiés dans leurs organes de direction. Cela contribue à une meilleure gouvernance de l’entreprise et favorise l’introduction de nouvelles perspectives.¹ <br />
-  4. Prendre des mesures pour lutter contre la corruption : Les grandes entreprises doivent mettre en place des actions préventives pour lutter contre la corruption.¹ <br />
-  5. Promouvoir et respecter les droits de l’homme : Les grandes entreprises doivent promouvoir et respecter les conventions fondamentales de l’Organisation internationale du travail concernant la liberté d’association, le droit de négociation collective, l’élimination des discriminations en matière d’emploi et de profession, et l’abolition effective du travail des enfants.² <br />
-  Veuillez noter que ces actions sont basées sur les informations extraites des documents officiels de la Commission européenne et peuvent être sujettes à des modifications ou à des ajouts ultérieurs. Il est recommandé de consulter les réglementations spécifiques applicables à votre secteur d’activité et de prendre conseil auprès de professionnels juridiques ou réglementaires pour vous assurer de la conformité de votre entreprise aux ESG réglementaires. <br />
-  Sources : <br />
- `
+  public initial_settings_accepted: boolean = false
 
   /**
    * @description:
@@ -170,4 +165,70 @@ export class ChatroomComponent {
   public handleOpenUserInitialSettingsModal(option: initialSettingsType): void {
     this.switchModalService.open_modal(option)
   }
+
+  /**
+   * @description: pdf viewer modal function
+   */
+  public handleOpenPDFViewerModal(): void {
+    this.switchModalService.open_modal('pdf_viewer', {
+      index: 1,
+      pageNumber: 13
+    })
+  }
+
+  /**
+   * @description: user actions function
+   */
+  public handleSelectAction(option: userActionType): void {
+    alert(option)
+  }
+
+  /**
+   * @description: user choise function
+   */
+  public handleSelectChoose(option: string): void {
+    alert(option)
+  }
+
+  /**
+   * @description: user choise function
+   */
+  public handleOpenLexiqueModal(option: string): void {
+    // this.switchModalService.open_modal('lexique', {
+    //   lexique: option
+    // })
+  }
+
+  /**
+   * @description: user choise function
+   */
+  public handleCloseLexiqueModal(): void {
+    // this.switchModalService.close()
+  }
+
+  /**
+   * @description:
+   */
+  // public clipboard(): void {
+  // this.link_copied = true;
+  // navigator.clipboard.writeText(this.share_link);
+  // this.countDown();
+  // }
+
+  /**
+   * @description:
+   */
+  // public countDown() {
+  //   if (this.time_left < 15) {
+  //     setTimeout(() => {
+  //       this.time_left = this.time_left + 1;
+  //       this.countDown();
+  //     }, 1000);
+  //   }
+
+  //   if (this.time_left === 15) {
+  //     this.link_copied = false;
+  //     this.time_left = 0;
+  //   }
+  // }
 }
