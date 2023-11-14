@@ -6,6 +6,9 @@ import {
 } from 'src/modules/tools/services/websocket.service'
 import { JoinRoomTypes } from '../types/chatroom.types'
 import { Profile } from 'src/modules/profile/services/user.service'
+import { LibsService } from 'src/modules/tools/services/libs.service'
+import { DeleteDuplicate } from 'src/modules/tools/classes/algo'
+import { FeelingService } from 'src/modules/feeling/services/feeling.service'
 
 /**
  * @description:
@@ -13,6 +16,23 @@ import { Profile } from 'src/modules/profile/services/user.service'
 export interface ChatroomStream {
   event: 'messages' | 'participants_counter' | 'new_message' | 'error' | 'init'
   data: any
+}
+
+/**
+ * @description:
+ * { "id": 43, "activated": true, "content": "aoeu", "relatedModel": null, "relatedModelId": null, "chatroom": 12, "profile": { "id": 3, "avatar": null, "group": "player", "is_anonymous": false, "birthdate": null, "language": "en", "isbotnet": false, "username": "7d4d9ede6fc941fe976b5cfa77eb74b9", "first_name": "", "last_name": "" }, "replyTo": null, "joinedFiles": [] }
+ */
+export interface ChatroomMessage {
+  id: number
+  activated: boolean
+  content: string
+  relatedModel: string | null
+  relatedModelId: number | null
+  chatroom: number
+  profile: Profile
+  replyTo: any
+  joinedFiles: Array<any>
+  replyToList: Array<any>
 }
 
 /**
@@ -48,7 +68,21 @@ export class ChatroomService {
   /**
    * @description:
    */
-  constructor(private wsService: WebsocketService) {
+  public message_list: Array<any> = []
+
+  /**
+   * @description:
+   */
+  public selected: ChatRoomTP | undefined
+
+  /**
+   * @description:
+   */
+  constructor(
+    private wsService: WebsocketService,
+    private l: LibsService,
+    private feeelingService: FeelingService
+  ) {
     this.bindChatRoomStream()
     this.setConfigWebsocket()
   }
@@ -76,10 +110,38 @@ export class ChatroomService {
   /**
    * @description:
    */
-  public recept__messages(data: any): void {
+  private format_message(message_list: Array<any>, message: any): void {
+    // -> Add the replyTo message to the message
+    let replyToList = message_list.filter((m) => m.replyTo === message.id)
+    message.replyToList = replyToList
+  }
+
+  /**
+   * @description:
+   */
+  private format_message_list(
+    message_list: Array<any>
+  ): Array<ChatroomMessage> {
+    let del_duplicate = new DeleteDuplicate()
+    message_list = del_duplicate.foreach(message_list, 'id')
+
+    for (let message of message_list) {
+      this.format_message(message_list, message)
+      this.feeelingService.setFeelingLoadList('chatroom.Message', message.id)
+    }
+
+    this.feeelingService.loadFeelingList(undefined)
+    return message_list.filter((m) => m.replyTo === null)
+  }
+
+  /**
+   * @description:
+   */
+  public recept__messages(message_list: Array<ChatroomMessage>): void {
+    console.log('recept__messages', 'service', message_list)
     this.stream.next({
       event: 'messages',
-      data: data
+      data: this.format_message_list(message_list)
     })
   }
 
@@ -101,10 +163,11 @@ export class ChatroomService {
   /**
    * @description:
    */
-  public recept__new_message(data: any): void {
+  public recept__new_message(message_list: any): void {
+    console.log('recept__new_message', 'service', message_list)
     this.stream.next({
       event: 'new_message',
-      data: data
+      data: this.format_message_list(message_list)
     })
   }
 
@@ -130,16 +193,33 @@ export class ChatroomService {
   /**
    * @description:
    */
-  public call__create_personnal_room(room: string): void {
-    alert(`from service, ${room}`)
+  public recept__new_room(data: any): void {
+    console.log('recept__new_room', 'service', data)
+    this.chatroom_list.unshift(data)
   }
 
   /**
    * @description:
    */
-  public call__join_room(room: JoinRoomTypes): void {
+  public call__create_personnal_room(room: string): void {
     this.ws_connection?.wsService?.send(this.ws_connection, {
-      join_room: room
+      create_personnal_room: {
+        name: room
+      }
+    })
+  }
+
+  /**
+   * @description:
+   */
+  public call__join_room(room: ChatRoomTP): void {
+    this.selected = room
+    console.log('call__join_room', 'service', this.selected)
+    this.ws_connection?.wsService?.send(this.ws_connection, {
+      join_room: {
+        chatroom__id: room.id,
+        user__id: room.onwer.id
+      }
     })
   }
 
@@ -151,7 +231,23 @@ export class ChatroomService {
   /**
    * @description:
    */
-  public call__delete_room(room: string): void {}
+  public call__delete_room(room: ChatRoomTP): void {
+    for (let chatroom of this.chatroom_list) {
+      if (chatroom.id === room.id) {
+        this.chatroom_list.splice(this.chatroom_list.indexOf(chatroom), 1)
+        break
+      }
+    }
+
+    if (room.id === this.selected?.id) {
+      this.selected = undefined
+      this.join_first_room_in_chatroom_list()
+    }
+
+    this.ws_connection?.wsService?.send(this.ws_connection, {
+      delete_room: room
+    })
+  }
 
   /**
    * @description:
@@ -166,7 +262,9 @@ export class ChatroomService {
   /**
    * @description:
    */
-  public call__get_messages(room: string): void {}
+  public call__get_messages(room: string): void {
+    // get messages
+  }
 
   /**
    * @description:
@@ -207,6 +305,13 @@ export class ChatroomService {
   /**
    * @description:
    */
+  public chatroom_is_selected(chatroom: ChatRoomTP): boolean {
+    return this.selected === chatroom
+  }
+
+  /**
+   * @description:
+   */
   private not_has_chatroom_to_join(): boolean {
     return !this.has_chatroom_to_join()
   }
@@ -225,10 +330,11 @@ export class ChatroomService {
     if (this.not_has_chatroom_to_join()) {
       return
     }
-    const chatroom = this.get_chatroom_list()[0]
-    this.call__join_room({
-      name: chatroom.name,
-      user__id: chatroom.onwer.id
-    })
+
+    let chatroom = this.get_chatroom_list()[0]
+    if (this.selected !== undefined) {
+      chatroom = this.selected
+    }
+    this.call__join_room(chatroom)
   }
 }

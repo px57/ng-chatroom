@@ -1,8 +1,12 @@
 import { Component, ViewChild } from '@angular/core'
-import { ChatroomService } from 'src/modules/chatroom/services/chatroom.service'
+import {
+  ChatroomService,
+  ChatroomMessage
+} from 'src/modules/chatroom/services/chatroom.service'
 import { Profile } from 'src/modules/profile/services/user.service'
 import { UserService } from 'src/modules/profile/services/user.service'
 import { SwitchModalService } from '../../../modal/services/switch-modal.service'
+import { __db__ } from 'src/app/app.db'
 
 /**
  * @description:
@@ -34,6 +38,8 @@ type userActionType = 'like' | 'dislike' | 'copy'
   ]
 })
 export class ChatroomComponent {
+  __db__ = __db__
+
   /**
    * @description:
    */
@@ -47,7 +53,7 @@ export class ChatroomComponent {
   /**
    * @description:
    */
-  public messages: Array<Message> = []
+  public messages: Array<ChatroomMessage> = []
 
   /**
    * @description:
@@ -106,6 +112,8 @@ export class ChatroomComponent {
       this.userService.open_login_modal()
       return
     }
+    console.log('sendMessage', this.new_message)
+
     this.chatroomService.call__send_message(this.new_message)
     this.new_message = ''
   }
@@ -121,7 +129,8 @@ export class ChatroomComponent {
   /**
    * @description:
    */
-  public recept__messages(messages: Array<Message>): void {
+  public recept__messages(messages: Array<ChatroomMessage>): void {
+    console.log('recept__messages', messages)
     this.messages = messages
     this.waitToScrollToBottom()
   }
@@ -129,8 +138,9 @@ export class ChatroomComponent {
   /**
    * @description:
    */
-  public recept__new_message(message: Message): void {
-    this.messages.push(message)
+  public recept__new_message(message: Array<ChatroomMessage>): void {
+    console.log('recept__new_message', message)
+    this.messages.push.apply(this.messages, message)
     this.waitToScrollToBottom()
     // TODO: Limit the number of messages in the chatroom, and delete the oldest ones. (100 max)
     // if (this.messages.length > this.max_messages) {
@@ -231,4 +241,13 @@ export class ChatroomComponent {
   //     this.time_left = 0;
   //   }
   // }
+
+  /**
+   * @description
+   */
+  public convertToJSON(value: string): any {
+    console.log('convertToJSON', value)
+    // return JSON.parse(value)
+    return 'Esta é uma mensagem'
+  }
 }
