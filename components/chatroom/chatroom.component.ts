@@ -7,6 +7,7 @@ import { Profile } from 'src/modules/profile/services/user.service'
 import { UserService } from 'src/modules/profile/services/user.service'
 import { SwitchModalService } from '../../../modal/services/switch-modal.service'
 import { __db__ } from 'src/app/app.db'
+import { InitialSettingsService } from '../../../../app/services/initial-settings.service'
 
 /**
  * @description:
@@ -76,7 +77,8 @@ export class ChatroomComponent {
   constructor(
     private chatroomService: ChatroomService,
     public userService: UserService,
-    public switchModalService: SwitchModalService
+    public switchModalService: SwitchModalService,
+    public initialSettingsService: InitialSettingsService
   ) {}
 
   /**
@@ -190,14 +192,14 @@ export class ChatroomComponent {
    * @description: user actions function
    */
   public handleSelectAction(option: userActionType): void {
-    alert(option)
+    alert(`handleSelectAction ${option}`)
   }
 
   /**
    * @description: user choise function
    */
   public handleSelectChoose(option: string): void {
-    alert(option)
+    alert(`handleSelectChoose ${option}`)
   }
 
   /**
@@ -247,7 +249,30 @@ export class ChatroomComponent {
    */
   public convertToJSON(value: string): any {
     console.log('convertToJSON', value)
-    // return JSON.parse(value)
-    return 'Esta é uma mensagem'
+    // const jsonData = JSON.parse(value)
+
+    // return jsonData.content.message
+    return 'Esta é uma mensagem de teste'
+  }
+
+  /**
+   * @description: sent initial settings
+   */
+  public handleSendInitialSettings(): void {
+    const { company_size, geography, sectors } =
+      this.initialSettingsService.initialSettings
+
+    if (!company_size || !geography || !sectors) {
+      alert($localize`Initial settings missing!`)
+      this.initial_settings_accepted = false
+      return
+    }
+
+    console.log(
+      'handleSendInitialSettings',
+      this.initialSettingsService.initialSettings
+    )
+
+    this.initial_settings_accepted = true
   }
 }
