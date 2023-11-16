@@ -223,6 +223,22 @@ export class ChatroomService {
     })
   }
 
+  // Jean 
+  // public sendInitialSettings(settings: InitialSettingsType): void {
+  //   this.ws_connection?.wsService?.send(this.ws_connection, {
+  //     set_initial_settings: settings
+  //   });
+  // }
+
+  selectedChatroomId: number | null = null;
+
+  public joinRoom(room: ChatRoomTP): void {
+    this.selectedChatroomId = room.id;
+    this.call__join_room(room);
+  }
+
+  //---
+
   /**
    * @description:
    */

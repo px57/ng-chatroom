@@ -248,11 +248,19 @@ export class ChatroomComponent {
    * @description
    */
   public convertToJSON(value: string): any {
-    console.log('convertToJSON', value)
-    // const jsonData = JSON.parse(value)
+    console.log('convertToJSON input: ', value)
+    const jsonData = JSON.parse(value)
 
-    // return jsonData.content.message
-    return 'Esta é uma mensagem de teste'
+    console.log('jsonData: ', jsonData)
+
+    console.log('\n-------\n')
+
+    var message = jsonData.message
+    console.log('message: ', message)
+
+    return message
+
+    // return 'Esta é uma mensagem de teste'
   }
 
   /**

@@ -26,6 +26,11 @@ export class MenuRoomListComponent {
   /**
    * @description:
    */
+  public selectedChatroomId: number | null = null;
+
+  /**
+   * @description:
+   */
   public isSideBarCollapsed: boolean = false
 
   /**
@@ -37,6 +42,13 @@ export class MenuRoomListComponent {
     public sidebarService: SidebarService
   ) {
     this.bindChatRoom()
+  }
+
+    // Implement the joinRoom method
+  joinRoom(chatroom: any): void {
+      this.selectedChatroomId = chatroom.id;
+      // Assuming chatroomService is injected and call__join_room is a method in the service
+      this.chatroomService.call__join_room(chatroom);
   }
 
   /**
