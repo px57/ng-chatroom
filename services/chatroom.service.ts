@@ -14,7 +14,7 @@ import { FeelingService } from 'src/modules/feeling/services/feeling.service'
  * @description:
  */
 export interface ChatroomStream {
-  event: 'messages' | 'participants_counter' | 'new_message' | 'error' | 'init'
+  event: 'messages' | 'participants_counter' | 'new_message' | 'new_message_ai' | 'error' | 'init'
   data: any
 }
 
@@ -33,6 +33,7 @@ export interface ChatroomMessage {
   replyTo: any
   joinedFiles: Array<any>
   replyToList: Array<any>
+  messageType: 'user' | 'ai'; // Add a type to distinguish between user and AI messages
 }
 
 /**
@@ -167,6 +168,14 @@ export class ChatroomService {
     console.log('recept__new_message', 'service', message_list)
     this.stream.next({
       event: 'new_message',
+      data: this.format_message_list(message_list)
+    })
+  }
+
+  public recept__new_message_ai(message_list: any): void {
+    console.log('recept__new_message_ai', 'service', message_list)
+    this.stream.next({
+      event: 'new_message_ai',
       data: this.format_message_list(message_list)
     })
   }

@@ -18,6 +18,7 @@ export interface Message {
   content: string
   chatroom: number
   profile: Profile
+  messageType: string
 }
 
 /**
@@ -134,6 +135,7 @@ export class ChatroomComponent {
   public recept__messages(messages: Array<ChatroomMessage>): void {
     console.log('recept__messages', messages)
     this.messages = messages
+    console.log('this.messages', this.messages)
     this.waitToScrollToBottom()
   }
 
@@ -143,6 +145,16 @@ export class ChatroomComponent {
   public recept__new_message(message: Array<ChatroomMessage>): void {
     console.log('recept__new_message', message)
     this.messages.push.apply(this.messages, message)
+    this.waitToScrollToBottom()
+    // TODO: Limit the number of messages in the chatroom, and delete the oldest ones. (100 max)
+    // if (this.messages.length > this.max_messages) {
+    //   this.messages.shift();
+    // }
+  }  
+  public recept__new_message_ai(message: Array<ChatroomMessage>): void {
+    console.log('recept__new_message_ai', message)
+    this.messages.push.apply(this.messages, message)
+    console.log('this.messages : ', this.messages)
     this.waitToScrollToBottom()
     // TODO: Limit the number of messages in the chatroom, and delete the oldest ones. (100 max)
     // if (this.messages.length > this.max_messages) {
@@ -248,6 +260,7 @@ export class ChatroomComponent {
    * @description
    */
   public convertToJSON(value: string): any {
+    
     console.log('convertToJSON input: ', value)
     const jsonData = JSON.parse(value)
 
