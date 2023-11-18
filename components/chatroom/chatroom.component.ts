@@ -8,6 +8,7 @@ import { UserService } from 'src/modules/profile/services/user.service'
 import { SwitchModalService } from '../../../modal/services/switch-modal.service'
 import { __db__ } from 'src/app/app.db'
 import { InitialSettingsService } from '../../../../app/services/initial-settings.service'
+import { PDFDocumentProxy } from 'ng2-pdf-viewer';
 
 /**
  * @description:
@@ -20,6 +21,22 @@ export interface Message {
   profile: Profile
   messageType: string
 }
+export interface Suggestion {
+  file_path: string
+  file_id: string
+  file_name: string
+  page_num: number
+  index: number
+  paragraph: string
+  text: string
+}
+
+export interface ExtensionMessage {
+  file_reader: Suggestion
+  summary_msg: string
+  action_msg: string
+}
+
 
 /**
  * @description: initial settings option type
@@ -70,7 +87,18 @@ export class ChatroomComponent {
   /**
    * @description: initial settings accepted value
    */
+  public initial_settings_validated_geography: boolean = false
+  public initial_settings_validated_company_type: boolean = false
+  public initial_settings_validated_sectors: boolean = false
   public initial_settings_accepted: boolean = false
+
+  /**
+   * @description: initial settings accepted value
+   */
+  public is_ai_message_loading: boolean = false
+
+  private baseDownloadUrl = 'http://localhost:9081'; // Adjust this base URL to your Django server
+
 
   /**
    * @description:
@@ -80,15 +108,17 @@ export class ChatroomComponent {
     public userService: UserService,
     public switchModalService: SwitchModalService,
     public initialSettingsService: InitialSettingsService
-  ) {}
+  ) {
+  }
 
   /**
    * @description:
    */
   public ngOnInit(): void {
+
     this.bindStreamChatroom()
   }
-
+  
   /**
    * @description:
    */
@@ -117,8 +147,21 @@ export class ChatroomComponent {
     }
     console.log('sendMessage', this.new_message)
 
-    this.chatroomService.call__send_message(this.new_message)
+    this.chatroomService.call__send_message(this.new_message, 'new_message')
     this.new_message = ''
+  }
+  public handleSuggestionClick(suggestion: any): void {
+    // Logic when a suggestion is clicked
+    if (!this.userService.is_authenticated()) {
+      this.userService.open_login_modal()
+      return
+    }
+  
+    const suggestionText = JSON.stringify(suggestion)
+    console.log('sendSuggestionn', suggestionText)
+  
+    this.chatroomService.call__send_message(suggestionText, "new_message_user_ext")
+  
   }
 
   // @@@@@@@@@@@@@@
@@ -128,6 +171,7 @@ export class ChatroomComponent {
   public recept__participants_counter(participants_counter: number): void {
     this.participants_counter = participants_counter
   }
+
 
   /**
    * @description:
@@ -144,7 +188,10 @@ export class ChatroomComponent {
    */
   public recept__new_message(message: Array<ChatroomMessage>): void {
     console.log('recept__new_message', message)
+
+    // if message
     this.messages.push.apply(this.messages, message)
+    this.is_ai_message_loading = true
     this.waitToScrollToBottom()
     // TODO: Limit the number of messages in the chatroom, and delete the oldest ones. (100 max)
     // if (this.messages.length > this.max_messages) {
@@ -154,6 +201,7 @@ export class ChatroomComponent {
   public recept__new_message_ai(message: Array<ChatroomMessage>): void {
     console.log('recept__new_message_ai', message)
     this.messages.push.apply(this.messages, message)
+    this.is_ai_message_loading = false
     console.log('this.messages : ', this.messages)
     this.waitToScrollToBottom()
     // TODO: Limit the number of messages in the chatroom, and delete the oldest ones. (100 max)
@@ -189,17 +237,6 @@ export class ChatroomComponent {
   public handleOpenUserInitialSettingsModal(option: initialSettingsType): void {
     this.switchModalService.open_modal(option)
   }
-
-  /**
-   * @description: pdf viewer modal function
-   */
-  public handleOpenPDFViewerModal(): void {
-    this.switchModalService.open_modal('pdf_viewer', {
-      index: 1,
-      pageNumber: 13
-    })
-  }
-
   /**
    * @description: user actions function
    */
@@ -259,41 +296,138 @@ export class ChatroomComponent {
   /**
    * @description
    */
-  public convertToJSON(value: string): any {
-    
-    console.log('convertToJSON input: ', value)
-    const jsonData = JSON.parse(value)
-
-    console.log('jsonData: ', jsonData)
-
-    console.log('\n-------\n')
-
-    var message = jsonData.message
-    console.log('message: ', message)
-
-    return message
-
-    // return 'Esta é uma mensagem de teste'
+  public getAIMessage(aiResponse: any): string {
+    // Parse the AI response here
+    const aiResponseJSON = JSON.parse(aiResponse)
+    // You might need to adjust the parsing logic based on the actual structure of `aiResponse`
+    const message = aiResponseJSON.message;
+    // Other parsing logic...
+    return message;
   }
+  public getSuggestionFromAIMessage(aiResponse: any): Array<Suggestion> {
+    // Parse the AI response here
+    const aiResponseJSON = JSON.parse(aiResponse)
+
+    console.log("aiResponse : ", aiResponse ) 
+
+    const suggestion = aiResponseJSON.suggestion;
+
+    console.log("suggestion : ", suggestion ) 
+       // Other parsing logic...
+    return suggestion;
+  }
+  public getTextFromExtendRequest(aiResponse: any): string {
+    // Parse the AI response here
+    const aiResponseJSON = JSON.parse(aiResponse)
+
+    console.log("getTextFromExtendRequest- aiResponse : ", aiResponse ) 
+
+    const text = aiResponseJSON.text;
+
+    console.log("getTextFromExtendRequest - suggestion : ", text ) 
+      // Other parsing logic...
+    return text;
+  }
+  public getExtensionFromAIMessage(aiResponse: any): ExtensionMessage {
+    // Parse the AI response here
+    const aiResponseJSON = JSON.parse(aiResponse)
+
+    console.log("aiResponse : ", aiResponse ) 
+
+    const extension = aiResponseJSON.message;
+
+    console.log("extension : ", extension ) 
+      // Other parsing logic...
+    return extension;
+  }
+
+
+
+  public showVocabularyDetail(vocabId: string): void {
+    // Logic to show vocabulary details
+  }
+
+
+  // public getFileUrl(file_id: string): string {
+  //   const downloadUrl = `${this.baseDownloadUrl}/v1/mediacenter/documents/download/${file_id}/`;    
+  //   console.log( "getFileUrl : ",  downloadUrl);
+  //   return downloadUrl
+  // }
+  public getFileUrl(file_id: string, file_name: string): string {
+    // Assuming file_name is provided without the .pdf extension
+    const downloadUrl = `${this.baseDownloadUrl}/v1/mediacenter/documents/download/${file_id}/${file_name}.pdf`;    
+    console.log("getFileUrl : ", downloadUrl);
+    return downloadUrl;
+}
+
+  public downloadDocument(file_id: string, file_name: string = "tmp_name"): void {
+      window.open(this.getFileUrl(file_id, file_name), '_blank');
+  }
+
+  public callBackPDF(pdf: PDFDocumentProxy) {
+    console.log( "Doc has loaded! ");
+    window.dispatchEvent(new Event('resize'));
+    // do anything with "pdf"
+ }
+
+  public handleOpenPDFViewerModal(file_id: string, file_name: string, page_num: number, file_link: string): void {
+    this.switchModalService.open_modal('pdf_viewer', {
+      file_name: file_name,
+      page_num: page_num,
+      file_id: file_id,
+      file_link: file_link,
+    })
+  }
+    // public convertToJSON(value: string): any {
+
+  //   console.log('convertToJSON input: ', value)
+  //   const jsonData = JSON.parse(value)
+
+  //   console.log('jsonData: ', jsonData)
+
+  //   console.log('\n-------\n')
+
+  //   var message = jsonData.message
+  //   console.log('message: ', message)
+
+  //   return message
+
+  //   // return 'Esta é uma mensagem de teste'
+  // }
 
   /**
    * @description: sent initial settings
    */
+
   public handleSendInitialSettings(): void {
-    const { company_size, geography, sectors } =
+    const { company_type, geography, sectors } =
       this.initialSettingsService.initialSettings
+    // ... existing code ...
 
-    if (!company_size || !geography || !sectors) {
-      alert($localize`Initial settings missing!`)
-      this.initial_settings_accepted = false
-      return
-    }
-
-    console.log(
-      'handleSendInitialSettings',
-      this.initialSettingsService.initialSettings
-    )
-
-    this.initial_settings_accepted = true
+    this.chatroomService.call__send_initial_settings({
+      company_type: company_type,
+      geography: geography,
+      sectors: sectors
+    });
+  
+    this.initial_settings_accepted = true;
   }
 }
+
+// public handleSendInitialSettings(): void {
+//   const { company_size, geography, sectors } =
+//     this.initialSettingsService.initialSettings
+
+//   if (!company_size || !geography || !sectors) {
+//     alert($localize`Initial settings missing!`)
+//     this.initial_settings_accepted = false
+//     return
+//   }
+
+//   console.log(
+//     'handleSendInitialSettings',
+//     this.initialSettingsService.initialSettings
+//   )
+
+//   this.initial_settings_accepted = true
+// }

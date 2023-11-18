@@ -6,6 +6,8 @@ import { ChatroomService } from 'src/modules/chatroom/services/chatroom.service'
 import { MenuRoomListComponent } from './components/menu-room-list/menu-room-list.component'
 import { ToolsModule } from '../tools/tools.module'
 import { FeelingModule } from '../feeling/feeling.module'
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+
 
 @NgModule({
   declarations: [ChatroomComponent, MenuRoomListComponent],
@@ -14,7 +16,8 @@ import { FeelingModule } from '../feeling/feeling.module'
     FormsModule,
     ReactiveFormsModule,
     ToolsModule,
-    FeelingModule
+    FeelingModule,
+    PdfViewerModule
   ],
   providers: [ChatroomService],
   exports: [ChatroomComponent, MenuRoomListComponent]

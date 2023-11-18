@@ -14,7 +14,7 @@ import { FeelingService } from 'src/modules/feeling/services/feeling.service'
  * @description:
  */
 export interface ChatroomStream {
-  event: 'messages' | 'participants_counter' | 'new_message' | 'new_message_ai' | 'error' | 'init'
+  event: 'messages' | 'participants_counter' | 'new_message' | 'new_message_ai' | 'new_message_user_ext' | 'new_message_ai_ext' | 'error' | 'init'
   data: any
 }
 
@@ -33,7 +33,7 @@ export interface ChatroomMessage {
   replyTo: any
   joinedFiles: Array<any>
   replyToList: Array<any>
-  messageType: 'user' | 'ai'; // Add a type to distinguish between user and AI messages
+  messageType: 'new_message' | 'new_message_ai' | 'new_message_user_ext' | 'new_message_ai_ext'; // Add a type to distinguish between user and AI messages
 }
 
 /**
@@ -45,6 +45,9 @@ export interface ChatRoomTP {
   name: string
   description: string
   onwer: Profile
+  industry: string
+  geography: string
+  companyType: string
 }
 
 @Injectable({
@@ -97,6 +100,27 @@ export class ChatroomService {
       pathname: 'ws/chat_room_consumer/',
       service: this
     })
+  }
+
+  // ##########################################[ INIT ]#########################################################
+  public checkAndCreateRoomIfNone(): void {
+    if (this.chatroom_list.length === 0) {
+      // No rooms available, create one
+      this.createDefaultRoom();
+    } else {
+      // Rooms available, join the first one or selected
+      this.joinFirstAvailableRoom();
+    }
+  }
+  
+  private createDefaultRoom(): void {
+    const defaultRoomName = 'Chatroom 1'; // Replace with your desired default room name
+    this.call__create_personnal_room(defaultRoomName);
+  }
+  
+  private joinFirstAvailableRoom(): void {
+    const firstRoom = this.chatroom_list[0];
+    this.joinRoom(firstRoom);
   }
 
   // ###############################################################################################################
@@ -179,6 +203,21 @@ export class ChatroomService {
       data: this.format_message_list(message_list)
     })
   }
+  public recept__new_message_user_ext(message_list: any): void {
+    console.log('recept__new_message_user_ext', 'service', message_list)
+    this.stream.next({
+      event: 'new_message_user_ext',
+      data: this.format_message_list(message_list)
+    })
+  }
+
+  public recept__new_message_ai_ext(message_list: any): void {
+    console.log('recept__new_message_ai_ext', 'service', message_list)
+    this.stream.next({
+      event: 'new_message_ai_ext',
+      data: this.format_message_list(message_list)
+    })
+  }
 
   // ###############################################################################################################
   // ###############################################################################################################
@@ -205,6 +244,7 @@ export class ChatroomService {
   public recept__new_room(data: any): void {
     console.log('recept__new_room', 'service', data)
     this.chatroom_list.unshift(data)
+    this.joinRoom(data); // Join the newly created room
   }
 
   /**
@@ -222,7 +262,8 @@ export class ChatroomService {
    * @description:
    */
   public call__join_room(room: ChatRoomTP): void {
-    this.selected = room
+    this.setSelectRoom(room)
+
     console.log('call__join_room', 'service', this.selected)
     this.ws_connection?.wsService?.send(this.ws_connection, {
       join_room: {
@@ -239,11 +280,19 @@ export class ChatroomService {
   //   });
   // }
 
-  selectedChatroomId: number | null = null;
+  public selectedChatroomId: number | null = null;
 
   public joinRoom(room: ChatRoomTP): void {
     this.selectedChatroomId = room.id;
     this.call__join_room(room);
+  }
+  public setSelectRoom(room: ChatRoomTP | undefined ) : void {
+    this.selected = room
+    if( this.selected === undefined ){
+      return
+    } else {
+      this.selectedChatroomId = this.selected.id;
+    }
   }
 
   //---
@@ -265,7 +314,7 @@ export class ChatroomService {
     }
 
     if (room.id === this.selected?.id) {
-      this.selected = undefined
+      this.setSelectRoom(undefined)
       this.join_first_room_in_chatroom_list()
     }
 
@@ -294,10 +343,19 @@ export class ChatroomService {
   /**
    * @description:
    */
-  public call__send_message(message: string): void {
+  public call__send_message(message: string, type: string): void {
     this.ws_connection?.wsService?.send(this.ws_connection, {
-      new_message: message
+      new_message: {
+        new_message: message,
+        type :  type
+      }
     })
+  }
+
+  public call__send_initial_settings(settings: any): void {
+    this.ws_connection?.wsService?.send(this.ws_connection, {
+      initial_settings: settings
+    });
   }
 
   /**
@@ -344,9 +402,18 @@ export class ChatroomService {
   /**
    * @description:
    */
+  public getLastChatroom(): ChatRoomTP | undefined {
+    if (this.chatroom_list.length > 0) {
+      return this.chatroom_list[this.chatroom_list.length];
+    }
+    return undefined; // Return undefined if the array is empty
+  }
   private set_chatroom_list(chatroom_list: Array<ChatRoomTP>): void {
     this.chatroom_list = chatroom_list
+    this.setSelectRoom(this.getLastChatroom())
+    this.checkAndCreateRoomIfNone();
   }
+
 
   /**
    * @description:
