@@ -102,6 +102,7 @@ export class ChatroomService {
     })
   }
 
+  
   // ##########################################[ INIT ]#########################################################
   public checkAndCreateRoomIfNone(): void {
     if (this.chatroom_list.length === 0) {

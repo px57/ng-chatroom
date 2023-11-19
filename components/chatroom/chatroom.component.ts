@@ -97,8 +97,7 @@ export class ChatroomComponent {
    */
   public is_ai_message_loading: boolean = false
 
-  private baseDownloadUrl = 'http://localhost:9081'; // Adjust this base URL to your Django server
-
+  private baseDownloadUrl = window.location.origin; // Adjust this base URL to your Django server
 
   /**
    * @description:
