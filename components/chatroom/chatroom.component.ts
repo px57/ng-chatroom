@@ -171,6 +171,11 @@ export class ChatroomComponent {
     this.participants_counter = participants_counter
   }
 
+  public getRoomIsLoading(): boolean {
+    console.log("getRoomIsLoading : ", this.chatroomService.room_is_loading)
+    return this.chatroomService.room_is_loading
+  }
+
 
   /**
    * @description:
@@ -307,11 +312,11 @@ export class ChatroomComponent {
     // Parse the AI response here
     const aiResponseJSON = JSON.parse(aiResponse)
 
-    console.log("aiResponse : ", aiResponse ) 
+    // console.log("aiResponse : ", aiResponse ) 
 
     const suggestion = aiResponseJSON.suggestion;
 
-    console.log("suggestion : ", suggestion ) 
+    // console.log("suggestion : ", suggestion ) 
        // Other parsing logic...
     return suggestion;
   }
@@ -319,11 +324,11 @@ export class ChatroomComponent {
     // Parse the AI response here
     const aiResponseJSON = JSON.parse(aiResponse)
 
-    console.log("getTextFromExtendRequest- aiResponse : ", aiResponse ) 
+    // console.log("getTextFromExtendRequest- aiResponse : ", aiResponse ) 
 
     const text = aiResponseJSON.text;
 
-    console.log("getTextFromExtendRequest - suggestion : ", text ) 
+    // console.log("getTextFromExtendRequest - suggestion : ", text ) 
       // Other parsing logic...
     return text;
   }
@@ -331,11 +336,11 @@ export class ChatroomComponent {
     // Parse the AI response here
     const aiResponseJSON = JSON.parse(aiResponse)
 
-    console.log("aiResponse : ", aiResponse ) 
+    // console.log("aiResponse : ", aiResponse ) 
 
     const extension = aiResponseJSON.message;
 
-    console.log("extension : ", extension ) 
+    // console.log("extension : ", extension ) 
       // Other parsing logic...
     return extension;
   }
@@ -355,7 +360,7 @@ export class ChatroomComponent {
   public getFileUrl(file_id: string, file_name: string): string {
     // Assuming file_name is provided without the .pdf extension
     const downloadUrl = `${this.baseDownloadUrl}/v1/mediacenter/documents/download/${file_id}/${file_name}.pdf`;    
-    console.log("getFileUrl : ", downloadUrl);
+    // console.log("getFileUrl : ", downloadUrl);
     return downloadUrl;
 }
 

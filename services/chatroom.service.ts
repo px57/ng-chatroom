@@ -79,6 +79,8 @@ export class ChatroomService {
    */
   public selected: ChatRoomTP | undefined
 
+  public room_is_loading: boolean = true
+
   /**
    * @description:
    */
@@ -169,6 +171,7 @@ export class ChatroomService {
       event: 'messages',
       data: this.format_message_list(message_list)
     })
+    if ( this.room_is_loading ){ this.room_is_loading = false }
   }
 
   /**
@@ -257,6 +260,7 @@ export class ChatroomService {
         name: room
       }
     })
+    this.room_is_loading = true
   }
 
   /**
@@ -272,6 +276,8 @@ export class ChatroomService {
         user__id: room.onwer.id
       }
     })
+    this.room_is_loading = true
+    console.log('this.room_is_loading', 'true')
   }
 
   // Jean 
