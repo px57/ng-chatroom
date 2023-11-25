@@ -25,6 +25,7 @@ export interface Suggestion {
   file_path: string
   file_id: string
   file_name: string
+  file_title: string
   page_num: number
   index: number
   paragraph: string
@@ -144,9 +145,15 @@ export class ChatroomComponent {
       this.userService.open_login_modal()
       return
     }
+    // `Hello ${param1}`;
+    var message = this.new_message
+    const message_with_settings = `Pour des entreprises du secteur \"${this.initialSettingsService.initialSettings.sectors}\" de ${this.initialSettingsService.initialSettings.company_type} dans la region \"${this.initialSettingsService.initialSettings.geography}\". `
+    if( this.initialSettingsService.initialSettings != this.initialSettingsService.baseSettings ) {
+      message = message_with_settings + message
+    }
     console.log('sendMessage', this.new_message)
 
-    this.chatroomService.call__send_message(this.new_message, 'new_message')
+    this.chatroomService.call__send_message(message, 'new_message')
     this.new_message = ''
   }
   public handleSuggestionClick(suggestion: any): void {
@@ -185,6 +192,9 @@ export class ChatroomComponent {
     this.messages = messages
     console.log('this.messages', this.messages)
     this.waitToScrollToBottom()
+    this.loadInitialSetting()
+    // this.initial_settings_accepted = false;
+    // this.initialSettingsService.resetInitialSettings()
   }
 
   /**
@@ -316,7 +326,7 @@ export class ChatroomComponent {
 
     const suggestion = aiResponseJSON.suggestion;
 
-    // console.log("suggestion : ", suggestion ) 
+    console.log("suggestion : ", suggestion ) 
        // Other parsing logic...
     return suggestion;
   }
@@ -357,15 +367,15 @@ export class ChatroomComponent {
   //   console.log( "getFileUrl : ",  downloadUrl);
   //   return downloadUrl
   // }
-  public getFileUrl(file_id: string, file_name: string): string {
+  public getFileUrl(file_id: string): string {
     // Assuming file_name is provided without the .pdf extension
-    const downloadUrl = `${this.baseDownloadUrl}/v1/mediacenter/documents/download/${file_id}/${file_name}.pdf`;    
+    const downloadUrl = `${this.baseDownloadUrl}/v1/mediacenter/documents/download/${file_id}.pdf`;    
     // console.log("getFileUrl : ", downloadUrl);
     return downloadUrl;
 }
 
-  public downloadDocument(file_id: string, file_name: string = "tmp_name"): void {
-      window.open(this.getFileUrl(file_id, file_name), '_blank');
+  public downloadDocument(file_id: string): void {
+      window.open(this.getFileUrl(file_id), '_blank');
   }
 
   public callBackPDF(pdf: PDFDocumentProxy) {
@@ -416,6 +426,23 @@ export class ChatroomComponent {
   
     this.initial_settings_accepted = true;
   }
+  public loadInitialSetting(): void {
+
+    console.log("loadInitialSetting ")
+    console.log("this.chatroomService.selected : ", this.chatroomService.selected)
+    if ( this.chatroomService.selected && this.chatroomService.selected.geography != undefined ){
+      console.log("Loading initial settings : ", this.chatroomService.selected.geography)
+      this.initial_settings_accepted = true;
+      this.initialSettingsService.loadInitialSettings( this.chatroomService.selected )
+
+    } else {
+      console.log("Resetting initial settings")
+      this.initial_settings_accepted = false;
+      this.initialSettingsService.resetInitialSettings()
+    }
+    console.log("-------")
+  }
+
 }
 
 // public handleSendInitialSettings(): void {
