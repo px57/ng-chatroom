@@ -42,7 +42,7 @@ export interface ExtensionMessage {
 /**
  * @description: initial settings option type
  */
-type initialSettingsType = 'all_sectors' | 'all_business' | 'all_geographies'
+type initialSettingsType = 'all_industry' | 'all_business' | 'all_geographies'
 
 /**
  * @description: user action option type
@@ -88,9 +88,9 @@ export class ChatroomComponent {
   /**
    * @description: initial settings accepted value
    */
-  public initial_settings_validated_geography: boolean = false
-  public initial_settings_validated_company_type: boolean = false
-  public initial_settings_validated_sectors: boolean = false
+  // public initial_settings_validated_geography: boolean = false
+  // public initial_settings_validated_company_type: boolean = false
+  // public initial_settings_validated_industry: boolean = false
   public initial_settings_accepted: boolean = false
 
   /**
@@ -146,14 +146,14 @@ export class ChatroomComponent {
       return
     }
     // `Hello ${param1}`;
-    var message = this.new_message
-    const message_with_settings = `Pour des entreprises du secteur \"${this.initialSettingsService.initialSettings.sectors}\" de ${this.initialSettingsService.initialSettings.company_type} dans la region \"${this.initialSettingsService.initialSettings.geography}\". `
-    if( this.initialSettingsService.initialSettings != this.initialSettingsService.baseSettings ) {
-      message = message_with_settings + message
-    }
-    console.log('sendMessage', this.new_message)
+    // var message = this.new_message
+    // const message_with_settings = `Pour des entreprises du secteur \"${this.initialSettingsService.initialSettings.industry}\" de ${this.initialSettingsService.initialSettings.company_type} dans la region \"${this.initialSettingsService.initialSettings.geography}\". `
+    // if( this.initialSettingsService.initialSettings != this.initialSettingsService.baseSettings ) {
+    //   message = message_with_settings + message
+    // }
+    // console.log('sendMessage', this.new_message)
 
-    this.chatroomService.call__send_message(message, 'new_message')
+    this.chatroomService.call__send_message(this.new_message, 'new_message')
     this.new_message = ''
   }
   public handleSuggestionClick(suggestion: any): void {
@@ -164,7 +164,7 @@ export class ChatroomComponent {
     }
   
     const suggestionText = JSON.stringify(suggestion)
-    console.log('sendSuggestionn', suggestionText)
+    // console.log('sendSuggestionn', suggestionText)
   
     this.chatroomService.call__send_message(suggestionText, "new_message_user_ext")
   
@@ -179,7 +179,7 @@ export class ChatroomComponent {
   }
 
   public getRoomIsLoading(): boolean {
-    console.log("getRoomIsLoading : ", this.chatroomService.room_is_loading)
+    // console.log("getRoomIsLoading : ", this.chatroomService.room_is_loading)
     return this.chatroomService.room_is_loading
   }
 
@@ -188,9 +188,9 @@ export class ChatroomComponent {
    * @description:
    */
   public recept__messages(messages: Array<ChatroomMessage>): void {
-    console.log('recept__messages', messages)
+    // console.log('recept__messages', messages)
     this.messages = messages
-    console.log('this.messages', this.messages)
+    // console.log('this.messages', this.messages)
     this.waitToScrollToBottom()
     this.loadInitialSetting()
     // this.initial_settings_accepted = false;
@@ -213,10 +213,10 @@ export class ChatroomComponent {
     // }
   }  
   public recept__new_message_ai(message: Array<ChatroomMessage>): void {
-    console.log('recept__new_message_ai', message)
+    // console.log('recept__new_message_ai', message)
     this.messages.push.apply(this.messages, message)
     this.is_ai_message_loading = false
-    console.log('this.messages : ', this.messages)
+    // console.log('this.messages : ', this.messages)
     this.waitToScrollToBottom()
     // TODO: Limit the number of messages in the chatroom, and delete the oldest ones. (100 max)
     // if (this.messages.length > this.max_messages) {
@@ -414,30 +414,45 @@ export class ChatroomComponent {
    */
 
   public handleSendInitialSettings(): void {
-    const { company_type, geography, sectors } =
+    const { company_type, geography, industry } =
       this.initialSettingsService.initialSettings
     // ... existing code ...
+
+    console.log("handleSendInitialSettings ")
+    console.log("this.initialSettingsService.initialSettings : ", this.initialSettingsService.initialSettings)
+
+    // This is important for the client to save the settings when navigating between rooms.
+    if ( this.chatroomService.selected ) {
+      this.chatroomService.selected.companyType = company_type
+      this.chatroomService.selected.geography = geography
+      this.chatroomService.selected.industry = industry
+    }
 
     this.chatroomService.call__send_initial_settings({
       company_type: company_type,
       geography: geography,
-      sectors: sectors
+      industry: industry
     });
   
-    this.initial_settings_accepted = true;
+    this.initialSettingsService.initial_settings_accepted = true;
   }
   public loadInitialSetting(): void {
 
     console.log("loadInitialSetting ")
     console.log("this.chatroomService.selected : ", this.chatroomService.selected)
+
     if ( this.chatroomService.selected && this.chatroomService.selected.geography != undefined ){
+
       console.log("Loading initial settings : ", this.chatroomService.selected.geography)
-      this.initial_settings_accepted = true;
+
+      this.initialSettingsService.initial_settings_accepted = true;
       this.initialSettingsService.loadInitialSettings( this.chatroomService.selected )
 
     } else {
+
       console.log("Resetting initial settings")
-      this.initial_settings_accepted = false;
+
+      this.initialSettingsService.initial_settings_accepted = false;
       this.initialSettingsService.resetInitialSettings()
     }
     console.log("-------")
@@ -446,10 +461,10 @@ export class ChatroomComponent {
 }
 
 // public handleSendInitialSettings(): void {
-//   const { company_size, geography, sectors } =
+//   const { company_size, geography, industry } =
 //     this.initialSettingsService.initialSettings
 
-//   if (!company_size || !geography || !sectors) {
+//   if (!company_size || !geography || !industry) {
 //     alert($localize`Initial settings missing!`)
 //     this.initial_settings_accepted = false
 //     return
