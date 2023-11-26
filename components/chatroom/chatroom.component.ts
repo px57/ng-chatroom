@@ -49,6 +49,7 @@ type initialSettingsType = 'all_industry' | 'all_business' | 'all_geographies'
  */
 type userActionType = 'like' | 'dislike' | 'copy'
 
+
 @Component({
   selector: 'chatroom__chatroom',
   templateUrl:
@@ -118,6 +119,21 @@ export class ChatroomComponent {
 
     this.bindStreamChatroom()
   }
+
+  public truncateWords(string : string, n_words : number) {
+    // Split the string into words
+    const words = string.split(' ');
+  
+    // Check if the string has more than ten words
+    if (words.length > n_words) {
+        // Join the first ten words and append '...'
+        return words.slice(0, n_words).join(' ') + '...';
+    }
+  
+    // If the string has ten words or less, return it as is
+    return string;
+  }
+  
   
   /**
    * @description:
