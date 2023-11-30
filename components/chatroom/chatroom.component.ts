@@ -399,15 +399,30 @@ export class ChatroomComponent {
     window.dispatchEvent(new Event('resize'));
     // do anything with "pdf"
  }
-
-  public handleOpenPDFViewerModal(file_id: string, file_name: string, page_num: number, file_link: string): void {
-    this.switchModalService.open_modal('pdf_viewer', {
-      file_name: file_name,
-      page_num: page_num,
-      file_id: file_id,
-      file_link: file_link,
-    })
+ public scrollToPage(pageNumber: number): void {
+  // Code to find and scroll to the specific page div
+  const page = document.querySelector('.page[data-page-number="' + pageNumber + '"]');
+  if (page) {
+    page.scrollIntoView({ behavior: 'smooth' });
   }
+}
+
+
+
+public handleOpenPDFViewerModal(file_id: string, file_name: string, page_num: number, file_link: string): void {
+  this.switchModalService.open_modal('pdf_viewer', {
+    file_name: file_name,
+    page_num: page_num,
+    file_id: file_id,
+    file_link: file_link,
+  });
+
+  // Setting a timer to call `scrollToPage`
+  setTimeout(() => {
+    this.scrollToPage(page_num);
+  }, 3000); 
+}
+
     // public convertToJSON(value: string): any {
 
   //   console.log('convertToJSON input: ', value)
