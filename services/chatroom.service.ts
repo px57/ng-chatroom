@@ -23,6 +23,7 @@ export interface ChatroomStream {
  * { "id": 43, "activated": true, "content": "aoeu", "relatedModel": null, "relatedModelId": null, "chatroom": 12, "profile": { "id": 3, "avatar": null, "group": "player", "is_anonymous": false, "birthdate": null, "language": "en", "isbotnet": false, "username": "7d4d9ede6fc941fe976b5cfa77eb74b9", "first_name": "", "last_name": "" }, "replyTo": null, "joinedFiles": [] }
  */
 export interface ChatroomMessage {
+  isLiked: boolean
   id: number
   activated: boolean
   content: string
