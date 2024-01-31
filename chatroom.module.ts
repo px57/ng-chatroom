@@ -7,6 +7,9 @@ import { MenuRoomListComponent } from './components/menu-room-list/menu-room-lis
 import { ToolsModule } from '../tools/tools.module'
 import { FeelingModule } from '../feeling/feeling.module'
 import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { ParameterProfileComponent } from '../parameter-profile/components/parameter-profile.component'
+import { ParameterProfileModule } from '../parameter-profile/parameter-profile.module'
+
 
 
 @NgModule({
@@ -17,7 +20,11 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     ReactiveFormsModule,
     ToolsModule,
     FeelingModule,
-    PdfViewerModule
+    PdfViewerModule,
+    ParameterProfileModule,
+
+    
+
   ],
   providers: [ChatroomService],
   exports: [ChatroomComponent, MenuRoomListComponent]

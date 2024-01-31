@@ -1,3 +1,5 @@
+
+
 import { Component, ViewChild } from '@angular/core'
 import {
   ChatroomService,
@@ -9,6 +11,11 @@ import { SwitchModalService } from '../../../modal/services/switch-modal.service
 import { __db__ } from 'src/app/app.db'
 import { InitialSettingsService } from '../../../../app/services/initial-settings.service'
 import { PDFDocumentProxy } from 'ng2-pdf-viewer';
+import { SharedDataService } from 'src/app/services/shared-data.service'
+import { HttpHeaders } from '@angular/common/http'
+import { QuizDataService } from 'src/app/services/quiz-data.service'
+import { combineLatest } from 'rxjs';
+
 
 /**
  * @description:
@@ -39,6 +46,12 @@ export interface ExtensionMessage {
 }
 
 
+
+//params
+
+
+
+
 /**
  * @description: initial settings option type
  */
@@ -65,6 +78,10 @@ export class ChatroomComponent {
    * @description:
    */
   @ViewChild('messages_container') messages_container: any
+
+  selectedSector: string [] = [];
+  geographyCom: string [] = [];
+  nEmployees: string[] =  [];
 
   /**
    * @description:
@@ -108,7 +125,9 @@ export class ChatroomComponent {
     private chatroomService: ChatroomService,
     public userService: UserService,
     public switchModalService: SwitchModalService,
-    public initialSettingsService: InitialSettingsService
+    public initialSettingsService: InitialSettingsService,
+    private sharedDataService: SharedDataService,
+    private quizDataService: QuizDataService
   ) {
   }
 
@@ -116,8 +135,10 @@ export class ChatroomComponent {
    * @description:
    */
   public ngOnInit(): void {
-
+    
     this.bindStreamChatroom()
+
+
   }
 
   public truncateWords(string : string, n_words : number) {
@@ -146,6 +167,9 @@ export class ChatroomComponent {
       }
       ;(this as any)[event_key](data.data)
     })
+
+    
+    
   }
 
   /**
@@ -161,6 +185,7 @@ export class ChatroomComponent {
       this.userService.open_login_modal()
       return
     }
+    
     // `Hello ${param1}`;
     // var message = this.new_message
     // const message_with_settings = `Pour des entreprises du secteur \"${this.initialSettingsService.initialSettings.industry}\" de ${this.initialSettingsService.initialSettings.company_type} dans la region \"${this.initialSettingsService.initialSettings.geography}\". `
@@ -364,7 +389,7 @@ export class ChatroomComponent {
 
     // console.log("aiResponse : ", aiResponse ) 
 
-    const extension = aiResponseJSON.message;
+    const extension = aiResponseJSON.message
 
     // console.log("extension : ", extension ) 
       // Other parsing logic...
@@ -445,28 +470,122 @@ public handleOpenPDFViewerModal(file_id: string, file_name: string, page_num: nu
    */
 
   public handleSendInitialSettings(): void {
-    const { company_type, geography, industry } =
-      this.initialSettingsService.initialSettings
-    // ... existing code ...
-
-    console.log("handleSendInitialSettings ")
-    console.log("this.initialSettingsService.initialSettings : ", this.initialSettingsService.initialSettings)
-
-    // This is important for the client to save the settings when navigating between rooms.
-    if ( this.chatroomService.selected ) {
-      this.chatroomService.selected.companyType = company_type
-      this.chatroomService.selected.geography = geography
-      this.chatroomService.selected.industry = industry
+    const userId = this.userService.get_profile_id();
+    if (userId === null) {
+      console.error("UserID is null");
+      return;
     }
+  
+    const id = { user_id: userId };
+    const headers = new HttpHeaders({'Content-Type': 'application/json'});
 
-    this.chatroomService.call__send_initial_settings({
-      company_type: company_type,
-      geography: geography,
-      industry: industry
+    this.sharedDataService.selectedSector$.subscribe(sector => {
+      console.log('Received sector:', sector);
+      // ...
     });
   
-    this.initialSettingsService.initial_settings_accepted = true;
+    combineLatest([
+      this.sharedDataService.selectedSector$,
+      this.sharedDataService.nEmployees$,
+      this.sharedDataService.countriesOperate$
+    ]).subscribe(([sector, employees, countries]: [any, any, any]) =>  {
+      this.selectedSector = sector;
+      this.nEmployees = employees;
+      this.geographyCom = countries;
+  
+      if (!this.selectedSector || this.selectedSector.length === 0 ||
+          !this.nEmployees || this.nEmployees.length === 0 ||
+          !this.geographyCom || this.geographyCom.length === 0) {
+        this.fetchSectorFromQuizDataService();
+      } else {
+        this.continueWithInitialSettings();
+      }
+    });
   }
+
+  private fetchSectorFromQuizDataService(): void {
+    const userId = this.userService.get_profile_id();
+    if (userId === null) {
+      console.error("UserID is null");
+      return;
+    }
+    console.log("Selected Sector:", this.selectedSector);
+    const id = { user_id: userId };
+    const headers = new HttpHeaders({'Content-Type': 'application/json'});
+  
+    this.quizDataService.getQuestionnaireData('getdata', id, { headers }).subscribe({
+      next: (response: any) => {
+        // Atualize aqui de acordo com a estrutura da sua resposta
+        this.selectedSector = response.sector_activity.split(', ');
+        this.nEmployees = response.workforce_size.split(', ');
+        this.geographyCom = response.operation_countries.split(', ');
+  
+        this.continueWithInitialSettings();
+      },
+      error: (error: any) => {
+        console.error(error);
+      }
+    });
+  }
+  selectedSectordef: string [] = [];
+  geographyComdef: string [] = [];
+  nEmployeesdef: string[] =  [];
+  headquarters_location: number[]= [];
+  net_revenue: number [] =[];
+  total_assets: number[] = [];
+  countries_with_most_employees: string [] = [];
+  countries_with_highest_turnover: string [] = []
+  has_subsidiaries: boolean  | null = null;
+  owns_or_operates_factories: boolean | null = null;
+  listed_in_eu_market: boolean | null = null;
+  provides_public_services: boolean | null = null;
+
+
+
+
+  private paramschat() {
+    const userId = this.userService.get_profile_id();
+    const id = { user_id: userId };
+    const headers = new HttpHeaders({'Content-Type': 'application/json'});
+
+  
+    this.quizDataService.getQuestionnaireData('getdata', id, { headers }).subscribe({
+      next: (response: any) => {
+        // Atualize aqui de acordo com a estrutura da sua resposta
+        this.selectedSectordef = response.sector_activity;
+        this.nEmployeesdef = response.workforce_size;
+        this.geographyComdef = response.operation_countries;
+        this.headquarters_location = response.headquarters_location;
+        this. net_revenue = response.net_revenue;
+        this.total_assets = response.total_assets;
+        this.countries_with_most_employees = response.countries_with_most_employees;
+        this.countries_with_highest_turnover = response.countries_with_highest_turnover;
+        this.has_subsidiaries = response.has_subsidiaries;
+        this.owns_or_operates_factories = response.owns_or_operates_factories
+        this.listed_in_eu_market = response.listed_in_eu_market
+        this.provides_public_services = response.provides_public_services
+
+  
+        this.continueWithInitialSettings();  // Chamada para processamento adicional
+      },
+      error: (error: any) => {
+        console.error(error);
+      }
+    });
+  }
+  
+  
+  private continueWithInitialSettings() {
+    console.log("Select213213:", this.selectedSector);
+  
+    this.chatroomService.call__send_initial_settings({
+      company_type: this.selectedSectordef,
+      geography: this.nEmployeesdef,
+      industry: this.geographyComdef,
+      headquarters_location: this.headquarters_location
+    });
+  }
+
   public loadInitialSetting(): void {
 
     console.log("loadInitialSetting ")
@@ -489,7 +608,14 @@ public handleOpenPDFViewerModal(file_id: string, file_name: string, page_num: nu
     console.log("-------")
   }
 
+
+
+
 }
+
+
+
+
 
 // public handleSendInitialSettings(): void {
 //   const { company_size, geography, industry } =
