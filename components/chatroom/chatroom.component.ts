@@ -15,7 +15,7 @@ import { SharedDataService } from 'src/app/services/shared-data.service'
 import { HttpHeaders } from '@angular/common/http'
 import { QuizDataService } from 'src/app/services/quiz-data.service'
 import { combineLatest } from 'rxjs';
-
+import { Router } from '@angular/router'
 
 /**
  * @description:
@@ -127,7 +127,8 @@ export class ChatroomComponent {
     public switchModalService: SwitchModalService,
     public initialSettingsService: InitialSettingsService,
     private sharedDataService: SharedDataService,
-    private quizDataService: QuizDataService
+    private quizDataService: QuizDataService,
+    private router: Router
   ) {
   }
 
@@ -137,9 +138,52 @@ export class ChatroomComponent {
   public ngOnInit(): void {
     
     this.bindStreamChatroom()
+    this.verifySe()
 
 
   }
+
+
+  
+  verifySe() {
+    const userId = this.userService.get_profile_id(); // Certifique-se de que isto retorna o ID do usuário correto
+    const headers = new HttpHeaders({'Content-Type': 'application/json'});
+
+    // Criar um objeto com 'user_id'
+    const body = JSON.stringify({ user_id: userId });
+
+    if (!localStorage.getItem('pageReloaded')) {
+      // Marca que a página será recarregada
+      localStorage.setItem('pageReloaded', 'true');
+
+      // Recarrega a página
+      location.reload();
+  } else {
+      // Remove a marcação para não recarregar novamente no futuro
+      localStorage.removeItem('pageReloaded');
+
+      const userId = this.userService.get_profile_id(); // Certifique-se de que isto retorna o ID do usuário correto
+      const headers = new HttpHeaders({'Content-Type': 'application/json'});
+
+      // Criar um objeto com 'user_id'
+      const body = JSON.stringify({ user_id: userId });
+
+      this.userService.post('settingsverify', body, { headers }).subscribe({
+          next: (response: any) => {
+              if (response.exists) {
+                  // Se o registro existe, redirecionar para '/'
+                  this.router.navigate(['/']);
+              } else {
+                  // Se não existe, redirecionar para '/profile-setting'
+                  this.router.navigate(['/profile-setting']);
+              }
+          },
+          error: (error: any) => {
+              console.error(error);
+          }
+      });
+  }
+}
 
   public truncateWords(string : string, n_words : number) {
     // Split the string into words
