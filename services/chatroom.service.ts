@@ -281,6 +281,10 @@ export class ChatroomService {
     console.log('this.room_is_loading', 'true')
   }
 
+  public roomID(room: ChatRoomTP){
+  return room.id
+  }
+
   // Jean 
   // public sendInitialSettings(settings: InitialSettingsType): void {
   //   this.ws_connection?.wsService?.send(this.ws_connection, {

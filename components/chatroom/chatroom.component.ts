@@ -146,6 +146,37 @@ export class ChatroomComponent {
 
   
   verifySe() {
+
+}
+
+  public truncateWords(string : string, n_words : number) {
+    // Split the string into words
+    const words = string.split(' ');
+  
+    // Check if the string has more than ten words
+    if (words.length > n_words) {
+        // Join the first ten words and append '...'
+        return words.slice(0, n_words).join(' ') + '...';
+    }
+  
+    // If the string has ten words or less, return it as is
+    return string;
+  }
+  
+  
+  /**
+   * @description:
+   */
+  private bindStreamChatroom(): void {
+    this.chatroomService.stream.subscribe((data) => {
+      let event_key = 'recept__' + data.event
+      if ((this as any)[event_key] === undefined) {
+        alert(event_key + ' is not defined in Chatroom.component.ts')
+      }
+      ;(this as any)[event_key](data.data)
+    })
+
+
     const userId = this.userService.get_profile_id(); // Certifique-se de que isto retorna o ID do usuário correto
     const headers = new HttpHeaders({'Content-Type': 'application/json'});
 
@@ -183,34 +214,6 @@ export class ChatroomComponent {
           }
       });
   }
-}
-
-  public truncateWords(string : string, n_words : number) {
-    // Split the string into words
-    const words = string.split(' ');
-  
-    // Check if the string has more than ten words
-    if (words.length > n_words) {
-        // Join the first ten words and append '...'
-        return words.slice(0, n_words).join(' ') + '...';
-    }
-  
-    // If the string has ten words or less, return it as is
-    return string;
-  }
-  
-  
-  /**
-   * @description:
-   */
-  private bindStreamChatroom(): void {
-    this.chatroomService.stream.subscribe((data) => {
-      let event_key = 'recept__' + data.event
-      if ((this as any)[event_key] === undefined) {
-        alert(event_key + ' is not defined in Chatroom.component.ts')
-      }
-      ;(this as any)[event_key](data.data)
-    })
 
     
     

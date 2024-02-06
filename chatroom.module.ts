@@ -9,6 +9,7 @@ import { FeelingModule } from '../feeling/feeling.module'
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { ParameterProfileComponent } from '../parameter-profile/components/parameter-profile.component'
 import { ParameterProfileModule } from '../parameter-profile/parameter-profile.module'
+import { RegulationsModule } from '../regulations/regulations.module'
 
 
 
@@ -22,6 +23,7 @@ import { ParameterProfileModule } from '../parameter-profile/parameter-profile.m
     FeelingModule,
     PdfViewerModule,
     ParameterProfileModule,
+    RegulationsModule
 
     
 
