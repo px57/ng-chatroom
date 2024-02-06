@@ -82,6 +82,7 @@ export class ChatroomComponent {
   selectedSector: string [] = [];
   geographyCom: string [] = [];
   nEmployees: string[] =  [];
+    
 
   /**
    * @description:
@@ -122,7 +123,7 @@ export class ChatroomComponent {
    * @description:
    */
   constructor(
-    private chatroomService: ChatroomService,
+    public chatroomService: ChatroomService,
     public userService: UserService,
     public switchModalService: SwitchModalService,
     public initialSettingsService: InitialSettingsService,
